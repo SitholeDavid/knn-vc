@@ -25,8 +25,16 @@ from .utils import (AttrDict, build_env, load_checkpoint, plot_spectrogram,
 torch.backends.cudnn.benchmark = True
 USE_ALT_MELCALC = True
 
+#####
+
+import wandb
+#####
+
 
 def train(rank, a, h):
+    os.environ["WANDB_API_KEY"] = '430e8c7ef92cf79a3d7c3d02e3d961257153181f'
+    wandb.login()
+
     if h.num_gpus > 1:
         init_process_group(backend=h.dist_config['dist_backend'], init_method=h.dist_config['dist_url'],
                            world_size=h.dist_config['world_size'] * h.num_gpus, rank=rank)
@@ -34,9 +42,10 @@ def train(rank, a, h):
     torch.cuda.manual_seed(h.seed)
     device = torch.device('cuda:{:d}'.format(rank))
 
-    generator = Generator(h).to(device)
-    mpd = MultiPeriodDiscriminator().to(device)
-    msd = MultiScaleDiscriminator().to(device)
+    with wandb.init(project='knnvc-training-1'):
+        generator = Generator(h).to(device)
+        mpd = MultiPeriodDiscriminator().to(device)
+        msd = MultiScaleDiscriminator().to(device)
 
     if rank == 0:
         print(generator)
@@ -125,6 +134,7 @@ def train(rank, a, h):
         if rank == 0:
             start = time.time()
             mb.write("Epoch: {}".format(epoch+1))
+            wandb.log({'Epoch': epoch+1})
 
         if h.num_gpus > 1:
             train_sampler.set_epoch(epoch)
@@ -226,6 +236,10 @@ def train(rank, a, h):
                     sw.add_scalar("training/mel_spec_error", mel_error, steps)
                     sw.add_scalar("training/disc_loss_total", loss_disc_all, steps)
 
+                    wandb.log({'training/gen_loss_total': loss_gen_all}, step=steps)
+                    wandb.log({'training/mel_spec_error': mel_error}, step=steps)
+                    wandb.log({'training/disc_loss_total': loss_disc_all}, step=steps)
+
                 # Validation
                 if steps % a.validation_interval == 0:  # and steps != 0:
                     generator.eval()
@@ -253,9 +267,11 @@ def train(rank, a, h):
                             if j <= 4:
                                 if steps == 0:
                                     sw.add_audio('gt/y_{}'.format(j), y[0], steps, h.sampling_rate)
+                                    wandb.log({'gt/y_{}'.format(j): wandb.Audio(y[0].cpu().detach().numpy(), h.sampling_rate)}, step=steps)
                                     sw.add_figure('gt/y_spec_{}'.format(j), plot_spectrogram(x[0]), steps)
 
                                 sw.add_audio('generated/y_hat_{}'.format(j), y_g_hat[0], steps, h.sampling_rate)
+                                wandb.log({'generated/y_hat_{}'.format(j): wandb.Audio( y_g_hat[0].cpu().detach().numpy(), h.sampling_rate)}, step=steps)
                                 if USE_ALT_MELCALC:
                                     y_hat_spec = alt_melspec(y_g_hat.squeeze(1))
                                 else:
@@ -268,6 +284,7 @@ def train(rank, a, h):
 
                         val_err = val_err_tot / (j+1)
                         sw.add_scalar("validation/mel_spec_error", val_err, steps)
+                        wandb.log({'validation/mel_spec_error': val_err}, step=steps)
                         mb.write(f"validation run complete at {steps:,d} steps. validation mel spec error: {val_err:5.4f}")
 
                     generator.train()
