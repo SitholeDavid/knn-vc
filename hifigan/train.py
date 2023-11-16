@@ -48,7 +48,7 @@ def train(rank, a, h):
         msd = MultiScaleDiscriminator().to(device)
 
     if rank == 0:
-        print(generator)
+        #print(generator)
         os.makedirs(a.checkpoint_path, exist_ok=True)
         print("checkpoints directory : ", a.checkpoint_path)
 
