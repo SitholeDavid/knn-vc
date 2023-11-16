@@ -236,9 +236,9 @@ def train(rank, a, h):
                     sw.add_scalar("training/mel_spec_error", mel_error, steps)
                     sw.add_scalar("training/disc_loss_total", loss_disc_all, steps)
 
-                    wandb.log({'training/gen_loss_total': loss_gen_all}, step=steps)
-                    wandb.log({'training/mel_spec_error': mel_error}, step=steps)
-                    wandb.log({'training/disc_loss_total': loss_disc_all}, step=steps)
+                    wandb.log({'training_gen_loss_total': loss_gen_all}, step=steps)
+                    wandb.log({'training_mel_spec_error': mel_error}, step=steps)
+                    wandb.log({'training_disc_loss_total': loss_disc_all}, step=steps)
 
                 # Validation
                 if steps % a.validation_interval == 0:  # and steps != 0:
@@ -284,7 +284,7 @@ def train(rank, a, h):
 
                         val_err = val_err_tot / (j+1)
                         sw.add_scalar("validation/mel_spec_error", val_err, steps)
-                        wandb.log({'validation/mel_spec_error': val_err}, step=steps)
+                        wandb.log({'validation_mel_spec_error': val_err}, step=steps)
                         mb.write(f"validation run complete at {steps:,d} steps. validation mel spec error: {val_err:5.4f}")
 
                     generator.train()
