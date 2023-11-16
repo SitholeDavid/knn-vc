@@ -34,6 +34,7 @@ import wandb
 def train(rank, a, h):
     os.environ["WANDB_API_KEY"] = '430e8c7ef92cf79a3d7c3d02e3d961257153181f'
     wandb.login()
+    wandb.init(project='knnvc-training-1')
 
     if h.num_gpus > 1:
         init_process_group(backend=h.dist_config['dist_backend'], init_method=h.dist_config['dist_url'],
@@ -42,10 +43,9 @@ def train(rank, a, h):
     torch.cuda.manual_seed(h.seed)
     device = torch.device('cuda:{:d}'.format(rank))
 
-    with wandb.init(project='knnvc-training-1'):
-        generator = Generator(h).to(device)
-        mpd = MultiPeriodDiscriminator().to(device)
-        msd = MultiScaleDiscriminator().to(device)
+    generator = Generator(h).to(device)
+    mpd = MultiPeriodDiscriminator().to(device)
+    msd = MultiScaleDiscriminator().to(device)
 
     if rank == 0:
         #print(generator)
