@@ -236,9 +236,9 @@ def train(rank, a, h):
                     sw.add_scalar("training/mel_spec_error", mel_error, steps)
                     sw.add_scalar("training/disc_loss_total", loss_disc_all, steps)
 
-                wandb.log({'training_gen_loss_total': loss_gen_all}, step=steps)
-                wandb.log({'training_mel_spec_error': mel_error}, step=steps)
-                wandb.log({'training_disc_loss_total': loss_disc_all}, step=steps)
+                wandb.log({'training_gen_loss_total': loss_gen_all})
+                wandb.log({'training_mel_spec_error': mel_error})
+                wandb.log({'training_disc_loss_total': loss_disc_all})
 
                 # Validation
                 if steps % a.validation_interval == 0:  # and steps != 0:
@@ -267,11 +267,11 @@ def train(rank, a, h):
                             if j <= 4:
                                 if steps == 0:
                                     sw.add_audio('gt/y_{}'.format(j), y[0], steps, h.sampling_rate)
-                                    wandb.log({'gt/y_{}'.format(j): wandb.Audio(y[0].flatten().cpu().detach().numpy(), h.sampling_rate)}, step=steps)
+                                    wandb.log({'gt/y_{}'.format(j): wandb.Audio(y[0].flatten().cpu().detach().numpy(), h.sampling_rate)})
                                     sw.add_figure('gt/y_spec_{}'.format(j), plot_spectrogram(x[0]), steps)
 
                                 sw.add_audio('generated/y_hat_{}'.format(j), y_g_hat[0], steps, h.sampling_rate)
-                                wandb.log({'generated/y_hat_{}'.format(j): wandb.Audio( y_g_hat[0].flatten().cpu().detach().numpy(), h.sampling_rate)}, step=steps)
+                                wandb.log({'generated/y_hat_{}'.format(j): wandb.Audio( y_g_hat[0].flatten().cpu().detach().numpy(), h.sampling_rate)})
                                 if USE_ALT_MELCALC:
                                     y_hat_spec = alt_melspec(y_g_hat.squeeze(1))
                                 else:
@@ -284,7 +284,7 @@ def train(rank, a, h):
 
                         val_err = val_err_tot / (j+1)
                         sw.add_scalar("validation/mel_spec_error", val_err, steps)
-                        wandb.log({'validation_mel_spec_error': val_err}, step=steps)
+                        wandb.log({'validation_mel_spec_error': val_err})
                         mb.write(f"validation run complete at {steps:,d} steps. validation mel spec error: {val_err:5.4f}")
 
                     generator.train()
