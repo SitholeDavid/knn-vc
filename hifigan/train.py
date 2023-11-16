@@ -267,11 +267,11 @@ def train(rank, a, h):
                             if j <= 4:
                                 if steps == 0:
                                     sw.add_audio('gt/y_{}'.format(j), y[0], steps, h.sampling_rate)
-                                    wandb.log({'gt/y_{}'.format(j): wandb.Audio(y[0].cpu().detach().numpy(), h.sampling_rate)}, step=steps)
+                                    wandb.log({'gt/y_{}'.format(j): wandb.Audio(y[0].flatten().cpu().detach().numpy(), h.sampling_rate)}, step=steps)
                                     sw.add_figure('gt/y_spec_{}'.format(j), plot_spectrogram(x[0]), steps)
 
                                 sw.add_audio('generated/y_hat_{}'.format(j), y_g_hat[0], steps, h.sampling_rate)
-                                wandb.log({'generated/y_hat_{}'.format(j): wandb.Audio( y_g_hat[0].cpu().detach().numpy(), h.sampling_rate)}, step=steps)
+                                wandb.log({'generated/y_hat_{}'.format(j): wandb.Audio( y_g_hat[0].flatten().cpu().detach().numpy(), h.sampling_rate)}, step=steps)
                                 if USE_ALT_MELCALC:
                                     y_hat_spec = alt_melspec(y_g_hat.squeeze(1))
                                 else:
