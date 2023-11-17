@@ -236,9 +236,13 @@ def train(rank, a, h):
                     sw.add_scalar("training/mel_spec_error", mel_error, steps)
                     sw.add_scalar("training/disc_loss_total", loss_disc_all, steps)
 
-                loss_gen_all_wandb = loss_gen_all
-                mel_error_wandb = mel_error
-                loss_disc_all_wandb = loss_disc_all
+                    wandb.log({'training_gen_loss_total': loss_gen_all}, step=steps)
+                    wandb.log({'training_mel_spec_error': mel_error}, step=steps)
+                    wandb.log({'training_disc_loss_total': loss_disc_all}, step=steps)
+
+                # loss_gen_all_wandb = loss_gen_all
+                # mel_error_wandb = mel_error
+                # loss_disc_all_wandb = loss_disc_all
 
                 # Validation
                 if steps % a.validation_interval == 0:  # and steps != 0:
@@ -294,9 +298,9 @@ def train(rank, a, h):
                     torch.cuda.reset_accumulated_memory_stats()
 
             steps += 1
-            wandb.log({'training_gen_loss_total': loss_gen_all_wandb}, step=steps)
-            wandb.log({'training_mel_spec_error': mel_error_wandb}, step=steps)
-            wandb.log({'training_disc_loss_total': loss_disc_all_wandb}, step=steps)
+            # wandb.log({'training_gen_loss_total': loss_gen_all_wandb}, step=steps)
+            # wandb.log({'training_mel_spec_error': mel_error_wandb}, step=steps)
+            # wandb.log({'training_disc_loss_total': loss_disc_all_wandb}, step=steps)
 
         scheduler_g.step()
         scheduler_d.step()
