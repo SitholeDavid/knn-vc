@@ -323,7 +323,7 @@ def main():
     parser.add_argument('--config', default='')
     parser.add_argument('--training_epochs', default=1500, type=int)
     parser.add_argument('--stdout_interval', default=5, type=int)
-    parser.add_argument('--checkpoint_interval', default=5000, type=int)
+    parser.add_argument('--checkpoint_interval', default=1000, type=int)
     parser.add_argument('--summary_interval', default=25, type=int)
     parser.add_argument('--validation_interval', default=1000, type=int)
     parser.add_argument('--fp16', default=False, type=bool)
